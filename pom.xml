@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.krux</groupId>
   <artifactId>kafka-mirror-maker</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   
       <build>
         <resources>
@@ -17,7 +17,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.krux.mirrormaker.consumer</mainClass>
+                            <mainClass>com.krux.mirrormaker.KruxMirrorMaker</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -49,36 +49,11 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>com.krux</groupId>
-            <artifactId>krux-stdlib</artifactId>
-            <version>1.0.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.9.2</artifactId>
-            <version>0.8.1.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.jms</groupId>
-                    <artifactId>jms</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.jmx</groupId>
-                    <artifactId>jmxri</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.jdmk</groupId>
-                    <artifactId>jmxtools</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+      <dependencies>
+      	<dependency>
+      		<groupId>com.krux</groupId>
+      		<artifactId>kafka-client-libs</artifactId>
+      		<version>0.0.1</version>
+      	</dependency>
+      </dependencies>
 </project>
