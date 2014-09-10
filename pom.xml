@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.krux</groupId>
   <artifactId>kafka-mirror-maker</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.4</version>
   
       <build>
         <resources>
@@ -49,11 +49,18 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>kruxmvn</id>
+            <name>kruxmvn-releases</name>
+            <url>http://kruxmvn.artifactoryonline.com/kruxmvn/libs-releases-local</url>
+        </repository>
+    </distributionManagement>
       <dependencies>
       	<dependency>
       		<groupId>com.krux</groupId>
       		<artifactId>kafka-client-libs</artifactId>
-      		<version>0.0.1</version>
+      		<version>0.0.2</version>
       	</dependency>
       </dependencies>
 </project>
