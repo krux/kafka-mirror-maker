@@ -44,10 +44,11 @@ public class KruxMirrorMaker {
         OptionSpec<String> whiteList = parser
                 .accepts( "whitelist", "Comma-separated list of topics to be included in mirroring" ).withRequiredArg()
                 .ofType( String.class );
-        OptionSpec<Integer> queueSize = parser.accepts( "queue-size", "Number of messages buffered between consumer and producer." ).withRequiredArg().ofType( Integer.class )
-                .defaultsTo( 1 );
-        OptionSpec<Integer> numConsumerStreams = parser.accepts( "num-streams", "Number of consumer threads per topic." ).withRequiredArg().ofType( Integer.class )
-                .defaultsTo( 1 );
+        OptionSpec<Integer> queueSize = parser
+                .accepts( "queue-size", "Number of messages buffered between consumer and producer." ).withRequiredArg()
+                .ofType( Integer.class ).defaultsTo( 1 );
+        OptionSpec<Integer> numConsumerStreams = parser.accepts( "num-streams", "Number of consumer threads per topic." )
+                .withRequiredArg().ofType( Integer.class ).defaultsTo( 1 );
 
         KruxStdLib.setOptionParser( parser );
         OptionSet options = KruxStdLib.initialize( args );
@@ -106,14 +107,14 @@ public class KruxMirrorMaker {
             int consumerThreadCount = options.valueOf( numConsumerStreams );
             // one thread per topic for now
             for ( String topic : allTopics ) {
-                
+
                 LOG.info( "Creating consumer/producer pair for topic " + topic + "..." );
                 Map<String, Integer> topicMap = new HashMap<String, Integer>();
                 topicMap.put( topic, consumerThreadCount );
-                
+
                 KafkaProducer producer = new KafkaProducer( producerProperties, topic );
                 MMMessageHandler handler = new MMMessageHandler( producer );
-                
+
                 KafkaConsumer consumer = new KafkaConsumer( consumerProperties, topicMap, handler );
                 consumer.start();
                 LOG.info( "...started." );
