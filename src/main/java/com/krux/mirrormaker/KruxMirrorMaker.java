@@ -90,7 +90,7 @@ public class KruxMirrorMaker {
             // if blacklist, remove those from topics to be mirrored
             if ( options.has( blackList ) ) {
                 LOG.info( "Purging topics in blacklist" );
-                String[] topics = options.valueOf( whiteList ).split( "," );
+                String[] topics = options.valueOf( blackList ).split( "," );
                 for ( String topic : topics ) {
                     allTopics.remove( topic.trim() );
                 }
