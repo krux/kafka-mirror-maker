@@ -65,6 +65,8 @@ public class KruxMirrorMaker {
 
             Properties producerProperties = new Properties();
             producerProperties.load( new FileInputStream( options.valueOf( producerConfig ) ) );
+            producerProperties.put("partitioner.class",
+                    System.getProperty("partitioner.class", "com.krux.kafka.producer.SimplePartitioner"));
 
             // deal with topic list
 
