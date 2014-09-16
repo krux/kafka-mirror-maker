@@ -28,7 +28,7 @@ public class MMMessageHandler implements MessageHandler<byte[]> {
         };
         
         final Timer t = new Timer();
-        t.schedule( publisher, 333, 333 );
+        t.schedule( publisher, 500, 500 );
         
         Runtime.getRuntime().addShutdownHook( new Thread() {
             @Override
