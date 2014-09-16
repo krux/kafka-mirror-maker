@@ -46,7 +46,7 @@ public class KruxMirrorMaker {
                 .ofType( String.class );
         OptionSpec<Integer> queueSize = parser
                 .accepts( "queue-size", "Number of messages buffered between consumer and producer." ).withRequiredArg()
-                .ofType( Integer.class ).defaultsTo( 1 );
+                .ofType( Integer.class ).defaultsTo( 1000 );
         OptionSpec<Integer> numConsumerStreams = parser.accepts( "num-streams", "Number of consumer threads per topic." )
                 .withRequiredArg().ofType( Integer.class ).defaultsTo( 1 );
 
@@ -56,7 +56,12 @@ public class KruxMirrorMaker {
         // ensure required cl options are present
         if ( !options.has( consumerConfig ) || !options.has( producerConfig ) ) {
             LOG.error( "'--consumer-config' and '--producer-config' are required parameters. Exitting!" );
-            System.exit( -1 );
+            System.exit( 1 );
+        }
+        
+        if ( options.valueOf( queueSize ) < 0 ) {
+            LOG.error( "'--queue-size' must be > 0. Exitting." );
+            System.exit( 1 );
         }
 
         try {
@@ -115,7 +120,7 @@ public class KruxMirrorMaker {
                 topicMap.put( topic, consumerThreadCount );
 
                 KafkaProducer producer = new KafkaProducer( producerProperties, topic );
-                MMMessageHandler handler = new MMMessageHandler( producer );
+                MMMessageHandler handler = new MMMessageHandler( producer, options.valueOf( queueSize ) );
 
                 KafkaConsumer consumer = new KafkaConsumer( consumerProperties, topicMap, handler );
                 consumer.start();
@@ -124,33 +129,7 @@ public class KruxMirrorMaker {
 
         } catch ( Exception e ) {
             LOG.error( "oops", e );
-            System.exit( -1 );
+            System.exit( 1 );
         }
-
-        // parse out topic->thread count mappings
-        // List<String> topicThreadMappings = options.valuesOf(
-        // topicThreadMapping );
-        // Map<String, Integer> topicMap = new HashMap<String, Integer>();
-        //
-        // for ( String topicThreadCount : topicThreadMappings ) {
-        // if ( topicThreadCount.contains( "," ) ) {
-        // String[] parts = topicThreadCount.split( "," );
-        // topicMap.put( parts[0], Integer.parseInt( parts[1] ) );
-        // } else {
-        // topicMap.put( topicThreadCount, 1 );
-        // }
-        // }
-        //
-        // // create single ConsumerConfig for all mappings. Topic and thread
-        // // counts will be overridden in BeaconStreamLogger
-        // ConsumerConfig config = KafkaConsumer.createConsumerConfig( options,
-        // optionSpecs );
-
-        // now setup producer(s) for pushing messages to other cluster
-
-        // KafkaConsumer runner = new KafkaConsumer(config, topicMap);
-        // runner.run();
-
     }
-
 }
