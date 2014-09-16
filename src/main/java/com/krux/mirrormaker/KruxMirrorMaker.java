@@ -120,7 +120,8 @@ public class KruxMirrorMaker {
                 topicMap.put( topic, consumerThreadCount );
 
                 KafkaProducer producer = new KafkaProducer( producerProperties, topic );
-                MMMessageHandler handler = new MMMessageHandler( producer, options.valueOf( queueSize ) );
+                //MMMessageHandler handler = new MMMessageHandler( producer, options.valueOf( queueSize ) );
+                MMMessageHandler handler = new MMMessageHandler( producer, 500 );
 
                 KafkaConsumer consumer = new KafkaConsumer( consumerProperties, topicMap, handler );
                 consumer.start();
