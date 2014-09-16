@@ -72,11 +72,11 @@ public class KruxMirrorMaker {
             producerProperties.load( new FileInputStream( options.valueOf( producerConfig ) ) );
             producerProperties.put("partitioner.class", "com.krux.kafka.producer.SimplePartitioner" );
             int socketBufferSize = 512*1024;
-            producerProperties.put("send.buffer.bytes", String.valueOf( socketBufferSize ));
+            producerProperties.put("send.buffer.bytes", socketBufferSize);
             producerProperties.put("batch.num.messages", 1000);
             producerProperties.put("compression.codec", "snappy");
             producerProperties.put("producer.type", "async");
-            producerProperties.put("request.required.acks", "0");
+            producerProperties.put("request.required.acks", 0);
 
             // deal with topic list
 
