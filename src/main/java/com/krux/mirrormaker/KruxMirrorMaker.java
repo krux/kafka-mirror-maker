@@ -97,7 +97,7 @@ public class KruxMirrorMaker {
 
             if ( allTopics == null || allTopics.size() == 0 ) {
                 LOG.error( "No topics specified for mirroring." );
-                System.exit( -1 );
+                System.exit( 1 );
             }
 
             // if blacklist, remove those from topics to be mirrored
