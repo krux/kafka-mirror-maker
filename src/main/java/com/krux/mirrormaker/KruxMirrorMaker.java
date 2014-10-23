@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.krux.kafka.consumer.KafkaConsumer;
 import com.krux.kafka.helpers.TopicUtils;
 import com.krux.kafka.producer.KafkaProducer;
+import com.krux.server.http.StdHttpServerHandler;
 import com.krux.stdlib.KruxStdLib;
 
 public class KruxMirrorMaker {
@@ -99,7 +100,7 @@ public class KruxMirrorMaker {
                 LOG.error( "No topics specified for mirroring." );
                 System.exit( 1 );
             }
-
+            
             // if blacklist, remove those from topics to be mirrored
             if ( options.has( blackList ) ) {
                 LOG.info( "Purging topics in blacklist" );
@@ -115,6 +116,8 @@ public class KruxMirrorMaker {
                 sb.append( " " );
             }
             LOG.info( "Will mirror: " + sb.toString() );
+            
+            StdHttpServerHandler.addAdditionalStatus("mirrored_topics", allTopics);
 
             int consumerThreadCount = options.valueOf( numConsumerStreams );
             // one thread per topic for now
