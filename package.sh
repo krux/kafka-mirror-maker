@@ -5,6 +5,7 @@ set -xe
 ### The dir for the package script
 MY_DIR=$( dirname $0 )
 cd $MY_DIR
+rm -fr *.deb
 
 ### Name of the package, project, etc
 NAME=krux-kafka-mirror-maker
