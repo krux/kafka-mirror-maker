@@ -1,6 +1,7 @@
 package com.krux.mirrormaker;
 
 import java.io.FileInputStream;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,18 @@ public class KruxMirrorMaker {
         try {
             Properties consumerProperties = new Properties();
             consumerProperties.load( new FileInputStream( options.valueOf( consumerConfig ) ) );
+            
+            //tmp hack to work around outdated kafka config
+            String hostname = InetAddress.getLocalHost().getHostName();
+            
+            String zkConnect = consumerProperties.getProperty( "zookeeper.connect" );
+            if ( hostname.contains( "dub") ) {
+                zkConnect.replace( "kafka-test", "kafka-a-dub" );
+            } else if ( hostname.contains( "pdx") ){
+                zkConnect.replace( "kafka-test", "kafka-a-pdx" );
+            }
+            LOG.warn( "Overriding configured kafka consumer url!! Using " + zkConnect );
+            consumerProperties.setProperty( "zookeeper.connect", zkConnect );
 
             Properties producerProperties = new Properties();
             producerProperties.load( new FileInputStream( options.valueOf( producerConfig ) ) );
@@ -78,6 +91,9 @@ public class KruxMirrorMaker {
             producerProperties.put("compression.codec", "snappy");
             producerProperties.put("producer.type", "async");
             producerProperties.put("request.required.acks", "0");
+            
+            producerProperties.put( "metadata.broker.list", "kafka-a001.krxd.net:9092,kafka-a002.krxd.net:9092,"
+                    + "kafka-a003.krxd.net:9092,kafka-a004.krxd.net:9092,kafka-a005.krxd.net:9092,kafka-a006.krxd.net:9092" );
 
             // deal with topic list
 
