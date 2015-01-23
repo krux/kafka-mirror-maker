@@ -75,9 +75,9 @@ public class KruxMirrorMaker {
             
             String zkConnect = consumerProperties.getProperty( "zookeeper.connect" );
             if ( hostname.contains( "dub") ) {
-                zkConnect.replace( "kafka-test", "kafka-a-dub" );
+                zkConnect = zkConnect.replace( "kafka-test", "kafka-a-dub" );
             } else if ( hostname.contains( "pdx") ){
-                zkConnect.replace( "kafka-test", "kafka-a-pdx" );
+                zkConnect = zkConnect.replace( "kafka-test", "kafka-a-pdx" );
             }
             LOG.warn( "Overriding configured kafka consumer url!! Using " + zkConnect );
             consumerProperties.setProperty( "zookeeper.connect", zkConnect );
