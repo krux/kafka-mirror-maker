@@ -16,3 +16,8 @@ java -Xms512M -Xmx512M -jar krux-kafka-mirror-maker-0.4.1.jar \
 ```
 
 The properties files conform to the same syntax as Kafka's Mirror Maker.
+
+Releases
+--------
+
+Full binary releases and archived source code can be found [here](https://github.com/krux/kafka-mirror-maker/releases).
