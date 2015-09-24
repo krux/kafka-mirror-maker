@@ -1,8 +1,0 @@
-why does lag reporter fail on pdx003
-instrument mirror maker stats and write cl tool - single tool for both
-
-high-level consumer (+ simple consumer for offsets and leader information?)
-existing producer lookup?
-
-why isn't steam listener round-robinning in pdx? add statsd/status
-
