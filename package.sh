@@ -29,4 +29,4 @@ DEST_DIR="/usr/local/${NAME}/"
 SOURCE_DIR="${MY_DIR}/${TARGET}"
 
 # run fpm
-/usr/local/bin/fpm -s dir -t deb -a all -n $PACKAGE_NAME -v $PACKAGE_VERSION --prefix $DEST_DIR -C $SOURCE_DIR $FILES
+fpm -s dir -t deb -a all -n $PACKAGE_NAME -v $PACKAGE_VERSION --prefix $DEST_DIR -C $SOURCE_DIR $FILES
