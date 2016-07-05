@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.PatternSyntaxException;
+import java.util.regex.Pattern;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -24,6 +26,8 @@ public class KruxMirrorMaker {
 
     private static final Logger LOG = LoggerFactory.getLogger( KruxMirrorMaker.class );
 
+
+
     public static void main( String[] args ) {
 
         Map<String, OptionSpec> optionSpecs = new HashMap<String, OptionSpec>();
@@ -40,11 +44,14 @@ public class KruxMirrorMaker {
         OptionSpec<String> producerConfig = parser.accepts( "producer-config", "Absolute path to producer config file." )
                 .withRequiredArg().ofType( String.class );
         OptionSpec<String> blackList = parser
-                .accepts( "blacklist", "Comma-separated list of topics to be excluded from mirroring" ).withRequiredArg()
+                .accepts( "blacklist", "Comma-separated list of topics to be excluded from mirroring or use --regex-filter flag to filter topics with a regular expression." ).withRequiredArg()
                 .ofType( String.class );
         OptionSpec<String> whiteList = parser
-                .accepts( "whitelist", "Comma-separated list of topics to be included in mirroring" ).withRequiredArg()
+                .accepts( "whitelist", "Comma-separated list of topics to be included in mirroring or use --regex-filter flag to filter topics with a regular expression." ).withRequiredArg()
                 .ofType( String.class );
+        OptionSpec<Boolean> RegExpFlag = parser
+                .accepts( "regex-filter", "Use regular expression topic filter" ).withOptionalArg()
+                .ofType( Boolean.class ).defaultsTo( false );
         OptionSpec<Integer> queueSize = parser
                 .accepts( "queue-size", "Number of messages buffered between consumer and producer." ).withRequiredArg()
                 .ofType( Integer.class ).defaultsTo( 1000 );
@@ -54,14 +61,21 @@ public class KruxMirrorMaker {
         KruxStdLib.setOptionParser( parser );
         OptionSet options = KruxStdLib.initialize( args );
 
+        Boolean isRegExpFilter = options.valueOf(RegExpFlag);
+
         // ensure required cl options are present
         if ( !options.has( consumerConfig ) || !options.has( producerConfig ) ) {
-            LOG.error( "'--consumer-config' and '--producer-config' are required parameters. Exitting!" );
+            LOG.error( "'--consumer-config' and '--producer-config' are required parameters. Exiting!" );
             System.exit( 1 );
         }
         
         if ( options.valueOf( queueSize ) < 0 ) {
-            LOG.error( "'--queue-size' must be > 0. Exitting." );
+            LOG.error( "'--queue-size' must be > 0. Exiting." );
+            System.exit( 1 );
+        }
+
+        if ( options.has( whiteList ) || options.has( blackList ) ) {
+            LOG.error( "please use either '--blacklist' or  '--whitelist'" );
             System.exit( 1 );
         }
 
@@ -83,32 +97,89 @@ public class KruxMirrorMaker {
 
             // if whitelist is specified, use that
             List<String> allTopics = new ArrayList<String>();
-            if ( options.has( whiteList ) ) {
+
+            if ( options.has( whiteList )) {
+
                 LOG.info( "Whitelist being applied" );
-                String[] topics = options.valueOf( whiteList ).split( "," );
-                for ( String topic : topics ) {
-                    allTopics.add( topic.trim() );
+
+                // get whitelist parameter value
+                String whiteListVal = options.valueOf( whiteList );
+
+                // build topic list with regex if --regex-filter flag is present
+                if (isRegExpFilter) {
+
+                    // get all topics
+                    String zkUrl = consumerProperties.getProperty( "zookeeper.connect" );
+                    LOG.info( "Fetching all topics from " + zkUrl );
+                    List<String> zkTopics = TopicUtils.getAllTopics( zkUrl );
+
+                    // build regex
+                    String regExp = whiteListVal.trim()
+                            .replace(',', '|')
+                            .replace(" ", "");
+
+                    // filter topic list with whitelist regex
+                    for (String topic: zkTopics) {
+                        if ( topic.matches(regExp) ) {
+                            allTopics.add(topic);
+                        }
+                    }
+
+                } else {
+
+                    String[] topics = whiteListVal.split(",");
+                    for (String topic : topics) {
+                        allTopics.add(topic.trim());
+                    }
+
                 }
-            } else {
+            } else if ( options.has( blackList ) ) {
+
+                // get blacklist parameter value
+                String blackListVal = options.valueOf( blackList );
+
                 // get all topics
                 String zkUrl = consumerProperties.getProperty( "zookeeper.connect" );
                 LOG.info( "Fetching all topics from " + zkUrl );
                 allTopics = TopicUtils.getAllTopics( zkUrl );
+
+                // build topic list with regex if --regex-filter flag is present
+                if (isRegExpFilter) {
+                    // build regex
+                    String regExp = blackListVal.trim()
+                            .replace(',', '|')
+                            .replace(" ", "");
+
+                    // filter topic list with blacklist regex
+                    for (String topic: allTopics) {
+                        if ( topic.matches(regExp) ) {
+                            allTopics.remove(topic.trim());
+                        }
+                    }
+
+                } else {
+
+                    LOG.info( "Purging topics in blacklist" );
+                    String[] topics = blackListVal.split( "," );
+                    for ( String topic : topics ) {
+                        allTopics.remove(topic.trim());
+                    }
+                }
+
+
+            } else {
+                LOG.error( "Please specify either a whitelist or blacklist" );
+                System.exit( 1 );
             }
 
+            // ensure the topic list is not empty
             if ( allTopics == null || allTopics.size() == 0 ) {
                 LOG.error( "No topics specified for mirroring." );
                 System.exit( 1 );
             }
-            
-            // if blacklist, remove those from topics to be mirrored
-            if ( options.has( blackList ) ) {
-                LOG.info( "Purging topics in blacklist" );
-                String[] topics = options.valueOf( blackList ).split( "," );
-                for ( String topic : topics ) {
-                    allTopics.remove( topic.trim() );
-                }
-            }
+
+
+
 
             StringBuilder sb = new StringBuilder();
             for ( String topic : allTopics ) {
