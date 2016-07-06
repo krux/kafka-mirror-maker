@@ -74,11 +74,6 @@ public class KruxMirrorMaker {
             System.exit( 1 );
         }
 
-        if ( options.has( whiteList ) || options.has( blackList ) ) {
-            LOG.error( "please use either '--blacklist' or  '--whitelist'" );
-            System.exit( 1 );
-        }
-
         try {
             Properties consumerProperties = new Properties();
             consumerProperties.load( new FileInputStream( options.valueOf( consumerConfig ) ) );
