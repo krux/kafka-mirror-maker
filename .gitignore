@@ -3,3 +3,6 @@
 .settings
 .project
 *.deb
+
+.idea
+*.iml
